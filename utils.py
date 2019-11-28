@@ -1,4 +1,27 @@
+import os
+
 import cv2
+import pandas as pd
+
+
+def get_filenames_in_current(folder: str):
+    walk = os.walk(folder)
+    for current_catalog, sub_catalogs, files in walk:
+        if current_catalog == folder:
+            return sorted(files)
+
+
+def _get_index_df(folder: str):
+    filenames = pd.Series(get_filenames_in_current(folder))
+    filenames = filenames[filenames.str.endswith('jpg')]
+    index_df = filenames.str.split('_', expand=True, n=2)
+    index_df = index_df.iloc[:, :1]
+    index_df = index_df.rename(columns={
+        0: 'pers_id', 1: 'env_descr',
+        2: 'orig_id'
+    })
+    index_df['filename'] = filenames
+    return index_df
 
 
 def simple_draw(img):
