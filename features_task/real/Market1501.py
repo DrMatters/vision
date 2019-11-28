@@ -9,7 +9,6 @@ class MarketDataset(data.Dataset):
         self.folder = folder
         self.index_df = index_df
         self.transforms = transforms
-        self.img_ids =
 
     def __getitem__(self, item):
         pass
