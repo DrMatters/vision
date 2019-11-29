@@ -29,7 +29,7 @@ class DownsamplingFill:
         grid_shape = np.asarray(image.shape) // self._cell_side
         # add one dimension for descriptor vector
         grid_shape = np.append(grid_shape, descriptors.shape[1])
-        grid = np.zeros(grid_shape, dtype=np.uint8)
+        grid = np.zeros(grid_shape, dtype=descriptors.dtype)
 
         for cell, cell_keypoints in keypoints_of_cell.items():
             cell_descriptors = descriptors_of_cell[cell]

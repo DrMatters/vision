@@ -20,20 +20,26 @@ def resolve_first(keypoints: List[cv2.KeyPoint],
 
 
 orb: cv2.ORB = cv2.ORB_create()
-detect_and_compute = functools.partial(orb.detectAndCompute, mask=None)
+sift: cv2.xfeatures2d_SIFT = cv2.xfeatures2d.SIFT_create()
+surf: cv2.xfeatures2d_SURF = cv2.xfeatures2d.SURF_create()
 
-max_resp_downs = non_ml_features.DownsamplingFill(
-    8, detect_and_compute, resolve_max_response
+dac_orb = functools.partial(orb.detectAndCompute, mask=None)
+sift_orb = functools.partial(sift.detectAndCompute, mask=None)
+surf_orb = functools.partial(surf.detectAndCompute, mask=None)
+
+orb_downs = non_ml_features.DownsamplingFill(
+    8, dac_orb, resolve_max_response
 )
-
-first_downs = non_ml_features.DownsamplingFill(
-    8, detect_and_compute, resolve_first
+sift_downs = non_ml_features.DownsamplingFill(
+    8, sift_orb, resolve_max_response
+)
+surf_downs = non_ml_features.DownsamplingFill(
+    8, surf_orb, resolve_max_response
 )
 
 img = cv2.imread('../data/images/human/3.png')
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-res_max = max_resp_downs.downsample(gray)
-res_first = first_downs.downsample(gray)
+res = [orb_downs.downsample(gray), sift_downs.downsample(gray), surf_downs.downsample(gray)]
 
-print(res_max)
+print('Finished')
