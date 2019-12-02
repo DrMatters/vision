@@ -11,7 +11,7 @@ def get_filenames_in_current(folder: str):
             return sorted(files)
 
 
-def _get_index_df(folder: str):
+def create_index_df(folder: str):
     filenames = pd.Series(get_filenames_in_current(folder))
     filenames = filenames[filenames.str.endswith('jpg')]
     index_df = filenames.str.split('_', expand=True, n=2)
