@@ -2,6 +2,7 @@ import collections
 from typing import Callable, Tuple, List
 
 import cv2
+import albumentations as albu
 import numpy as np
 
 
@@ -36,3 +37,18 @@ class DownsamplingFill:
             descriptor = self._resolve(cell_keypoints, cell_descriptors)
             grid[cell[1], cell[0]] = descriptor
         return grid
+
+class DescriptorsPreprocessing:
+    def __init__(self,
+                 detect_and_compute: Callable[[np.ndarray], Tuple[List[cv2.KeyPoint], np.ndarray]]):
+        self._extract = detect_and_compute
+
+    def _extract_descriptors(self, image, **kwargs):
+        keypoints, cur_descriptors = self._extract(image)
+        return cur_descriptors
+
+    def get_preprocessing(self):
+        _transform = [
+            albu.Lambda(image=self._extract_descriptors)
+        ]
+        return albu.Compose(_transform)

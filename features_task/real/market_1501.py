@@ -4,6 +4,7 @@ from typing import FrozenSet
 import albumentations as albu
 import pandas as pd
 from torch.utils import data
+import cv2
 
 
 class MarketDataset(data.Dataset):
