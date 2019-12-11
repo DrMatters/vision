@@ -14,6 +14,7 @@ DATASETS_FOLDER = pathlib.Path(settings.datasets_path)
 DATASET_SUBFOLDER = pathlib.Path('./VIRAT/BigSizeVideo/')
 CUR_FOLDER: Union[Path, Any] = DATASETS_FOLDER / DATASET_SUBFOLDER / SELECT_FILE
 DEBUG = True
+RESIZE_SCALE = 0.5
 
 EventWithId = collections.namedtuple('EventWithId', [
     'framespan',
@@ -68,6 +69,11 @@ def update_active_persons(frame_no: int, events: List[EventWithId],
 
 
 def play(markdown: Dict, capture: cv2.VideoCapture):
+    resize_resolution = (
+        int(capture.get(cv2.CAP_PROP_FRAME_WIDTH) * RESIZE_SCALE),
+        int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT) * RESIZE_SCALE)
+    )
+
     persons = markdown['viper']['data']['sourcefile']['object']
     if DEBUG:
         for person_id in persons:
@@ -93,32 +99,47 @@ def play(markdown: Dict, capture: cv2.VideoCapture):
                                                       expected_event_id,
                                                       active_persons_ids)
 
-        current_bboxes = []
-        for person_id in active_persons_ids:
-            person = persons[person_id]
-            if 'current_bbox_id' not in person:
-                person['current_bbox_id'] = 0
-            current_bbox_id = person['current_bbox_id']
-            current_bbox = person['attribute']['data:bbox'][current_bbox_id]
-            end = int(current_bbox['@framespan'].split(':')[1])
-            if end == frame_no:
-                person['current_bbox_id'] += 1
-            current_bboxes.append(current_bbox)
-
-        for bbox in current_bboxes:
-            h = int(bbox['@height'])
-            w = int(bbox['@width'])
-            x = int(bbox['@x'])
-            y = int(bbox['@y'])
-
-            frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (0xff, 0xff, 0xff), thickness=5)
+        current_bboxes = get_bboxes_for_active(active_persons_ids, frame_no,
+                                               persons)
+        frame = put_bboxes_on_frame(current_bboxes, frame)
 
         if show_frames:
-            frame = cv2.resize(frame, (400, 300))
+            frame = cv2.resize(frame, resize_resolution)
             cv2.imshow('vid', frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
         frame_no += 1
+
+
+def put_bboxes_on_frame(current_bboxes, frame):
+    for bbox_with_id in current_bboxes:
+        h = int(bbox_with_id[0]['@height'])
+        w = int(bbox_with_id[0]['@width'])
+        x = int(bbox_with_id[0]['@x'])
+        y = int(bbox_with_id[0]['@y'])
+
+        COL_WHITE = (0xff, 0xff, 0xff)
+        frame = cv2.rectangle(frame, (x, y), (x + w, y + h), COL_WHITE,
+                              thickness=5)
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        frame = cv2.putText(frame, str(bbox_with_id[1]), (x, y + h), font, 1,
+                            (0, 0, 0), thickness=6)
+    return frame
+
+
+def get_bboxes_for_active(active_persons_ids, frame_no, persons):
+    current_bboxes = []
+    for person_id in active_persons_ids:
+        person = persons[person_id]
+        if 'current_bbox_id' not in person:
+            person['current_bbox_id'] = 0
+        current_bbox_id = person['current_bbox_id']
+        current_bbox = person['attribute']['data:bbox'][current_bbox_id]
+        end = int(current_bbox['@framespan'].split(':')[1])
+        if end == frame_no:
+            person['current_bbox_id'] += 1
+        current_bboxes.append((current_bbox, person_id))
+    return current_bboxes
 
 
 def main():
