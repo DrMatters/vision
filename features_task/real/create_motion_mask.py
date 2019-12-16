@@ -1,9 +1,10 @@
+import abc
 import os
-from typing import List, Tuple, Callable
 import pathlib
 import shutil
+from typing import List, Tuple, Callable
+
 import cv2
-import abc
 
 
 class BaseTransformer:
@@ -30,12 +31,12 @@ class OpencvMOG(BaseTransformer):
         return self.mog.apply(entity)
 
 
-
-
 class MotionMaskCreator:
-    def __init__(self, base_folder='./', file_extension='.jpeg'):
+    def __init__(self, base_folder: str = './', file_extension: str = '.jpeg',
+                 output_subfolder_name: str = 'masks'):
         self._extension = file_extension
         self._base_folder = base_folder
+        self._output_subfolder = output_subfolder_name
 
     @staticmethod
     def _get_all_leafs(root) -> List:
@@ -59,7 +60,7 @@ class MotionMaskCreator:
     def _prepare_folder(self, folder_path, exists_error=False) -> \
             Tuple[List[str], List[str], pathlib.Path]:
         full_paths, filenames = self._get_files_from_leaf(folder_path)
-        masks_folder = pathlib.Path(folder_path) / 'masks'
+        masks_folder = pathlib.Path(folder_path) / self._output_subfolder
         if masks_folder.exists():
             if exists_error:
                 raise FileExistsError(f'Masks older exists: {masks_folder}')
@@ -82,10 +83,8 @@ class MotionMaskCreator:
                 tr_entity = transformer.transform(entity)
                 save_callback(str(result_path), tr_entity)
 
+
 if __name__ == '__main__':
     a = MotionMaskCreator('E:\\datasets\\SAIVT-SoftBio\\Uncontrolled')
     mog: cv2.BackgroundSubtractorMOG2 = cv2.createBackgroundSubtractorMOG2()
     a.do_things(cv2.imread, cv2.imwrite, OpencvMOG.create)
-
-
-
