@@ -2,19 +2,19 @@ import torchreid
 
 
 def main():
-    datamanager = torchreid.data.ImageDataManager(
+    datamanager = torchreid.data.VideoDataManager(
         root='E:\\datasets',
-        sources='dukemtmcreid',
-        targets='dukemtmcreid',
+        sources='ilidsvid',
+        targets='ilidsvid',
         height=256,
         width=128,
-        batch_size_train=32,
-        batch_size_test=100,
+        batch_size_train=2,
+        batch_size_test=2,
         transforms=['random_flip', 'random_crop']
     )
 
     model = torchreid.models.build_model(
-        name='resnet50',
+        name='osnet_x0_25',
         num_classes=datamanager.num_train_pids,
         loss='softmax',
         pretrained=True
@@ -32,7 +32,7 @@ def main():
         stepsize=20
     )
 
-    engine = torchreid.engine.ImageSoftmaxEngine(
+    engine = torchreid.engine.VideoSoftmaxEngine(
         datamanager,
         model,
         optimizer=optimizer,
@@ -41,7 +41,7 @@ def main():
     )
 
     engine.run(
-        save_dir='log/resnet50',
+        save_dir='log/osnet',
         max_epoch=60,
         eval_freq=10,
         print_freq=10,
