@@ -1,11 +1,15 @@
 import torchreid
+from features_task.real import saivt_softbio
 
 
 def main():
+    torchreid.data.register_video_dataset('saivt_softbio',
+                                          saivt_softbio.Saivt_SoftBio)
+
     datamanager = torchreid.data.VideoDataManager(
         root='E:\\datasets',
-        sources='ilidsvid',
-        targets='ilidsvid',
+        sources='saivt_softbio',
+        targets='saivt_softbio',
         height=256,
         width=128,
         batch_size_train=2,
