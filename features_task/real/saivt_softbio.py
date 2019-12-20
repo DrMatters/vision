@@ -3,11 +3,18 @@ from __future__ import print_function
 from __future__ import division
 from sklearn import model_selection
 
-import sys
 import os
 import os.path as osp
 
 from torchreid.data import VideoDataset
+
+from torchreid import data
+
+class Saivt_SoftBioImageReader(data.ImageReader):
+    def read_image(self, path):
+        # 1. get roi
+        # 2. cut selected image
+        pass
 
 
 class Saivt_SoftBio(VideoDataset):
@@ -30,6 +37,6 @@ class Saivt_SoftBio(VideoDataset):
 
         super(Saivt_SoftBio, self).__init__(train, query, gallery, **kwargs)
 
-    def prepare_tracklets(self, persons):
-        for pers_id, person in enumerate(persons):
-            for
+    # def prepare_tracklets(self, persons):
+    #     for pers_id, person in enumerate(persons):
+    #         for

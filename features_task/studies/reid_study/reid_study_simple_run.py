@@ -3,18 +3,19 @@ from features_task.real import saivt_softbio
 
 
 def main():
-    torchreid.data.register_video_dataset('saivt_softbio',
-                                          saivt_softbio.Saivt_SoftBio)
+    # torchreid.data.register_video_dataset('saivt_softbio',
+    #                                       saivt_softbio.Saivt_SoftBio)
 
     datamanager = torchreid.data.VideoDataManager(
-        root='E:\\datasets',
-        sources='saivt_softbio',
-        targets='saivt_softbio',
+        root='/Volumes/drmatters/datasets',
+        sources='ilidsvid',
+        targets='ilidsvid',
         height=256,
         width=128,
         batch_size_train=2,
         batch_size_test=2,
-        transforms=['random_flip', 'random_crop']
+        transforms=['random_flip', 'random_crop'],
+        train_sampler='RandomSampler'
     )
 
     model = torchreid.models.build_model(
