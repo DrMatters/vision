@@ -6,7 +6,7 @@ def main():
     #                                       saivt_softbio.Saivt_SoftBio)
 
     datamanager = torchreid.data.VideoDataManager(
-        root='/Volumes/drmatters/datasets',
+        root='G:\\datasets',
         sources='ilidsvid',
         targets='ilidsvid',
         height=256,
@@ -20,7 +20,7 @@ def main():
     model = torchreid.models.build_model(
         name='osnet_x0_25',
         num_classes=datamanager.num_train_pids,
-        loss='softmax',
+        loss='triplet',
         pretrained=True
     )
 
@@ -36,7 +36,7 @@ def main():
         stepsize=20
     )
 
-    engine = torchreid.engine.VideoSoftmaxEngine(
+    engine = torchreid.engine.VideoTripletEngine(
         datamanager,
         model,
         optimizer=optimizer,
