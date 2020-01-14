@@ -1,5 +1,4 @@
 import torchreid
-from features_task.real import saivt_softbio
 
 
 def main():
