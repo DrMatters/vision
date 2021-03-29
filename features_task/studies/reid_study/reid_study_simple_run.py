@@ -6,7 +6,7 @@ def main():
     #                                       saivt_softbio.Saivt_SoftBio)
 
     datamanager = torchreid.data.VideoDataManager(
-        root='G:\\datasets',
+        root='E:\\datasets',
         sources='ilidsvid',
         targets='ilidsvid',
         height=256,
@@ -48,7 +48,7 @@ def main():
         save_dir='log/osnet',
         max_epoch=60,
         eval_freq=10,
-        print_freq=10,
+        print_freq=1,
         test_only=False
     )
 

@@ -10,6 +10,7 @@ import pathlib
 import cv2
 import xmltodict
 from sklearn import model_selection
+import numpy as np
 from PIL import Image
 
 import torchreid
@@ -23,9 +24,11 @@ class Saivt_SoftBioImageReader(data.ImageReader):
         # 2. cut selected image
         path = pathlib.Path(path)
         directory = path.parents[0]
-        _, camera_no = self.extract_num(directory.stem)
-        _, subject_no = self.extract_num(directory.parents[0].stem)
-        im_no = int(path.stem[-4:])
+        _, camera_no = self.extract_num_right(directory.stem)
+        _, subject_no = self.extract_num_right(directory.parents[0].stem)
+        im_no = int(path.stem.split('-')[-1].split('.')[0])
+
+        # TODO: index rois of all images to memory
 
         roi_info = self.get_roi(camera_no, directory, im_no, subject_no)
         l = int(roi_info['@l'])
@@ -37,11 +40,14 @@ class Saivt_SoftBioImageReader(data.ImageReader):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         cropped = image[t:b, l:r]
-        cropped = Image.fromarray(cropped)
+        cropped = np.stack((cropped, np.zeros(cropped.shape[:2], np.uint8)),
+                           axis=2)
+
+        # cropped = Image.fromarray(cropped)
         return cropped
 
     @staticmethod
-    def extract_num(s: str):
+    def extract_num_right(s: str):
         head = s.rstrip('0123456789')
         tail = s[len(head):]
         return head, tail
@@ -108,7 +114,7 @@ torchreid.data.register_video_dataset('saivt_softbio', Saivt_SoftBio)
 
 if __name__ == "__main__":
     datamanager = torchreid.data.VideoDataManager(
-        root='/Volumes/drmatters/datasets',
+        root='E:\\datasets',
         sources='saivt_softbio',
         targets='saivt_softbio',
         height=256,
@@ -119,6 +125,9 @@ if __name__ == "__main__":
         train_sampler='RandomSampler'
     )
     for i, batch in enumerate(datamanager.return_dataloaders()[0]):
-        print(batch[0].shape)
+        if i < 10:
+            print(batch[0].shape)
+        else:
+            break
 
     pass
